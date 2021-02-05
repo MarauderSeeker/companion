@@ -8,7 +8,8 @@ import {
   CompanionActionEvent,
   CompanionFeedbackEvent,
   CompanionFeedbackResult,
-  CompanionUpgradeScript
+  CompanionUpgradeScript,
+  CompanionActionEventInfo
 } from './instance_skel_types'
 
 declare abstract class InstanceSkel<TConfig> {
@@ -51,7 +52,7 @@ declare abstract class InstanceSkel<TConfig> {
    * Executes the provided action.
    * @since 1.0.0
    */
-  action?(action: CompanionActionEvent): void
+  action?(action: CompanionActionEvent, info: CompanionActionEventInfo): void
 
   /**
    * Processes a feedback state.
@@ -72,8 +73,14 @@ declare abstract class InstanceSkel<TConfig> {
   setPresetDefinitions(presets: CompanionPreset[]): void
 
   setVariable(variableId: string, value: string): void
-  getVariable(variableId: string, cb: (value: string) => void): void
+  getVariable(variableId: string, cb: (value: string) => void): void    
   checkFeedbacks(feedbackId?: string): void
+
+  /**
+   * Parse a string to replace any variable references with their values.
+   * This will parse variables from any module instance, and expects the same syntax as the ui
+   */
+  parseVariables(text: string, cb: (value: string | undefined) => void): void
 
   /**
    * Get an array of all the feedbacks for this instance
@@ -93,7 +100,7 @@ declare abstract class InstanceSkel<TConfig> {
   /**
    * Get an array of all the actions and release_actions for this instance
    */
-  getAllActions(): CompanionFeedbackEvent[]
+  getAllActions(): CompanionActionEvent[]
   /**
    * Trigger the subscribe callback on all actions and release_actions for this instance
    * @param actionId Action type to call for, or undefined for all
@@ -111,6 +118,7 @@ declare abstract class InstanceSkel<TConfig> {
   debug(formatter: string, ...args: any[]): void
 
   rgb(red: number, green: number, blue: number): number
+  rgbRev(color: number): { r: number; g: number; b: number }
 
   STATUS_UNKNOWN: null
   STATUS_OK: 0

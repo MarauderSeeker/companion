@@ -17,11 +17,8 @@
 
 
 if (process.env.DEVELOPER !== undefined) {
-	process.env['DEBUG'] = '*,-websocket*,-express*,-engine*,-socket.io*,-send*,-db,-NRC*,-follow-redirects,-electron-timer-fix';
+	process.env['DEBUG'] = '*,-websocket*,-express*,-engine*,-socket.io*,-send*,-db,-NRC*,-follow-redirects';
 }
-
-// Fix timers in electron
-require('./electron-timer-fix').fix();
 
 global.MAX_BUTTONS = 32;
 global.MAX_BUTTONS_PER_ROW = 8;
@@ -29,11 +26,8 @@ global.MAX_BUTTONS_PER_ROW = 8;
 var EventEmitter = require('events');
 var system = new EventEmitter();
 var fs = require("fs");
-var path = require('path')
 var debug = require('debug')('app');
 var mkdirp = require('mkdirp');
-var util = require('util');
-var events = require('events');
 var stripAnsi = require('strip-ansi');
 var logbuffer = [];
 var logwriting = false;
@@ -52,7 +46,7 @@ system.on('skeleton-info', function(key, val) {
 		cfgDir = val + "/companion/";
 		mkdirp(cfgDir, function(err) {
 			debug("mkdirp",cfgDir,err);
-			config = new (require('./bitfocus-libs/config'))(system, cfgDir, {
+			config = new (require('./lib/config'))(system, cfgDir, {
 				http_port: 8888,
 				bind_ip: "127.0.0.1",
 				start_minimised: false,
@@ -144,7 +138,7 @@ system.on('skeleton-ready', function() {
 		process.stderr.write = function() {
 			var arr = [];
 			for (var n in arguments) {
-				arr.push(arguments[0]);
+				arr.push(arguments[n]);
 			}
 			var line = new Date().toISOString() + " " + stripAnsi(arr.join(" ").trim() );
 			logbuffer.push(line);
@@ -153,34 +147,37 @@ system.on('skeleton-ready', function() {
 
 	}
 
-	var server_http= require('./lib/server_http')(system);
-	var io         = require('./lib/io')(system, server_http);
-	var log        = require('./lib/log')(system,io);
-	var db         = require('./lib/db')(system,cfgDir);
-	var userconfig = require('./lib/userconfig')(system)
-	var update     = require('./lib/update')(system,cfgDir);
-	var page       = require('./lib/page')(system)
-	var appRoot    = require('app-root-path');
-	var variable   = require('./lib/variable')(system);
-	var feedback   = require('./lib/feedback')(system);
-	var action     = require('./lib/action')(system);
-	var bank       = require('./lib/bank')(system);
-	var elgatoDM   = require('./lib/elgato_dm')(system);
-	var preview    = require('./lib/preview')(system);
-	var instance   = require('./lib/instance')(system);
-	var osc        = require('./lib/osc')(system);
-	var server_api = require('./lib/server_api')(system);
-	var server_tcp = require('./lib/server_tcp')(system);
-	var server_udp = require('./lib/server_udp')(system);
-	var artnet     = require('./lib/artnet')(system);
-	var rest       = require('./lib/rest')(system);
-	var rest_poll  = require('./lib/rest_poll')(system);
-	var loadsave   = require('./lib/loadsave')(system);
-	var preset     = require('./lib/preset')(system);
-	var tablet     = require('./lib/tablet')(system);
-	var satellite  = require('./lib/satellite_server')(system);
-	var ws_api     = require('./lib/ws_api')(system);
-	var help       = require('./lib/help')(system);
+	var server_http      = require('./lib/server_http')(system);
+	var io               = require('./lib/io')(system, server_http);
+	var log              = require('./lib/log')(system,io);
+	var db               = require('./lib/db')(system,cfgDir);
+	var userconfig       = require('./lib/userconfig')(system)
+	var update           = require('./lib/update')(system,cfgDir);
+	var page             = require('./lib/page')(system)
+	var appRoot          = require('app-root-path');
+	var variable         = require('./lib/variable')(system);
+	var schedule         = require('./lib/schedule')(system);
+	var feedback         = require('./lib/feedback')(system);
+	var action           = require('./lib/action')(system);
+	var bank             = require('./lib/bank')(system);
+	var elgatoDM         = require('./lib/elgato_dm')(system);
+	var preview          = require('./lib/preview')(system);
+	var instance         = require('./lib/instance')(system);
+	var osc              = require('./lib/osc')(system);
+	var server_api       = require('./lib/server_api')(system);
+	var server_tcp       = require('./lib/server_tcp')(system);
+	var server_udp       = require('./lib/server_udp')(system);
+	var server_emberplus = require('./lib/server_emberplus')(system);
+	var artnet           = require('./lib/artnet')(system);
+	var rosstalk         = require('./lib/rosstalk')(system);
+	var rest             = require('./lib/rest')(system);
+	var rest_poll        = require('./lib/rest_poll')(system);
+	var loadsave         = require('./lib/loadsave')(system);
+	var preset           = require('./lib/preset')(system);
+	var tablet           = require('./lib/tablet')(system);
+	var satellite        = require('./lib/satellite_server')(system);
+	var ws_api           = require('./lib/ws_api')(system);
+	var help             = require('./lib/help')(system);
 
 	system.emit('modules_loaded');
 
